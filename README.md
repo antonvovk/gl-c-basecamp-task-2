@@ -20,4 +20,4 @@ Application will:
 # Next things to do:
 - Make better ui
 - Add threading
-- Disconnect ability for user
+- Errors handling

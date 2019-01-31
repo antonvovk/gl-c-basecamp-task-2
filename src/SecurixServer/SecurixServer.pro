@@ -1,14 +1,15 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2019-01-21T13:42:15
+# Project created by QtCreator 2019-01-21T13:42:41
 #
 #-------------------------------------------------
 
 QT       += core gui network
+CONFIG += static
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = SecurixClient
+TARGET = SecurixServer
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -26,13 +27,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    client.cpp \
-    securenetworkmanager.cpp
+        sslserver.cpp \
+        ../Common/message.cpp \
+        ../Common/room.cpp \
+        ../Common/user.cpp \
+    backend.cpp
 
 HEADERS += \
         mainwindow.h \
-    client.h \
-    securenetworkmanager.h
+        sslserver.h \
+        ../Common/message.h \
+        ../Common/room.h \
+        ../Common/user.h \
+    backend.h
 
 FORMS += \
         mainwindow.ui

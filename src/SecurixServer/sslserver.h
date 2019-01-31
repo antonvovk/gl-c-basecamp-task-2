@@ -12,7 +12,7 @@
 class SslServer : public QTcpServer {
     Q_OBJECT
 public:
-    SslServer(QObject *parent = 0);
+    SslServer(QObject *parent = nullptr);
     const QSslCertificate &getSslLocalCertificate() const;
     const QSslKey &getSslPrivateKey() const;
     QSsl::SslProtocol getSslProtocol() const;

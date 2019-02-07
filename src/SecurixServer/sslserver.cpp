@@ -1,34 +1,39 @@
 #include "sslserver.h"
 
-SslServer::SslServer(QObject *parent) : QTcpServer(parent), m_sslLocalCertificate(), m_sslPrivateKey(), m_sslProtocol(QSsl::UnknownProtocol) {
+SslServer::SslServer(QObject *parent) : QTcpServer(parent), sslLocalCertificate(), sslPrivateKey(), sslProtocol(QSsl::UnknownProtocol) {
 
+}
+
+SslServer& SslServer::instance() {
+    static SslServer instance;
+    return instance;
 }
 
 void SslServer::incomingConnection(qintptr socketDescriptor) {
     QSslSocket *sslSocket = new QSslSocket(this);
     sslSocket->setSocketDescriptor(socketDescriptor);
-    sslSocket->setLocalCertificate(m_sslLocalCertificate);
-    sslSocket->setPrivateKey(m_sslPrivateKey);
-    sslSocket->setProtocol(m_sslProtocol);
+    sslSocket->setLocalCertificate(sslLocalCertificate);
+    sslSocket->setPrivateKey(sslPrivateKey);
+    sslSocket->setProtocol(sslProtocol);
     sslSocket->startServerEncryption();
 
     this->addPendingConnection(sslSocket);
 }
 
 const QSslCertificate &SslServer::getSslLocalCertificate() const {
-    return m_sslLocalCertificate;
+    return sslLocalCertificate;
 }
 
 const QSslKey &SslServer::getSslPrivateKey() const {
-    return m_sslPrivateKey;
+    return sslPrivateKey;
 }
 
 QSsl::SslProtocol SslServer::getSslProtocol() const {
-    return m_sslProtocol;
+    return sslProtocol;
 }
 
 void SslServer::setSslLocalCertificate(const QSslCertificate &certificate) {
-    m_sslLocalCertificate = certificate;
+    sslLocalCertificate = certificate;
 }
 
 bool SslServer::setSslLocalCertificate(const QString &path, QSsl::EncodingFormat format) {
@@ -37,12 +42,12 @@ bool SslServer::setSslLocalCertificate(const QString &path, QSsl::EncodingFormat
     if (!certificateFile.open(QIODevice::ReadOnly))
         return false;
 
-    m_sslLocalCertificate = QSslCertificate(certificateFile.readAll(), format);
+    sslLocalCertificate = QSslCertificate(certificateFile.readAll(), format);
     return true;
 }
 
 void SslServer::setSslPrivateKey(const QSslKey &key) {
-    m_sslPrivateKey = key;
+    sslPrivateKey = key;
 }
 
 bool SslServer::setSslPrivateKey(const QString &fileName, QSsl::KeyAlgorithm algorithm, QSsl::EncodingFormat format, const QByteArray &passPhrase) {
@@ -51,10 +56,10 @@ bool SslServer::setSslPrivateKey(const QString &fileName, QSsl::KeyAlgorithm alg
     if (!keyFile.open(QIODevice::ReadOnly))
         return false;
 
-    m_sslPrivateKey = QSslKey(keyFile.readAll(), algorithm, format, QSsl::PrivateKey, passPhrase);
+    sslPrivateKey = QSslKey(keyFile.readAll(), algorithm, format, QSsl::PrivateKey, passPhrase);
     return true;
 }
 
 void SslServer::setSslProtocol(QSsl::SslProtocol protocol) {
-    m_sslProtocol = protocol;
+    sslProtocol = protocol;
 }

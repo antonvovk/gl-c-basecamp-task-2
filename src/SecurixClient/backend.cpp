@@ -2,9 +2,23 @@
 
 BackEnd::BackEnd(QObject *parent) : QObject(parent) {
     QObject::connect(&this->sslSocket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    query.exec("CREATE TABLE `users`.`user` (`username` TEXT NULL DEFAULT NULL, "
+                                            "`password` TEXT NULL DEFAULT NULL, "
+                                            "`full_name` TEXT NULL DEFAULT NULL, "
+                                            "`current_room` TEXT NULL DEFAULT NULL);");
 }
 
-void BackEnd::connectToSecureHost(const QString &hostname, const quint16 &port, const QString &username, const QString &roomname) {
+BackEnd& BackEnd::instance() {
+    static BackEnd instance;
+    return instance;
+}
+
+void BackEnd::connectToSecureHost() {
+    if (hostname.isEmpty()) {
+        hostname = "127.0.0.1";
+        port = 4444;
+    }
+
     if (sslSocket.state() != QTcpSocket::ConnectedState) {
         sslSocket.addCaCertificates("sslserver.pem");
         sslSocket.connectToHostEncrypted(hostname, port);
@@ -15,16 +29,12 @@ void BackEnd::connectToSecureHost(const QString &hostname, const quint16 &port, 
             return;
         }
 
-        user.name = username;
-        room.name = roomname;
-        sendMessage("Cnnct");
     }
 }
 
-void BackEnd::sendMessage(const QString &message_data_txt) {
+void BackEnd::notifyServerOfNewMessage() {
     QDataStream stream(&sslSocket);
-    message.text_data = message_data_txt;
-    stream << user << room << message;
+    stream << "New Message!";
 
     if (!sslSocket.waitForBytesWritten(-1)) {
         // Add error handling here
@@ -33,54 +43,52 @@ void BackEnd::sendMessage(const QString &message_data_txt) {
     }
 }
 
-void BackEnd::outputToUi() {
-    history.clear();
-    if (message_received.text_data.contains("disconnected") || message_received.text_data.contains("connected")) {
-        history.append(message_received.text_data);
-        emit doUiData(history, users_list);
-        return;
-    }
-
-    if (!message_received.text_data.contains("Users:")) {
-        history.append(user_received.name + ": " + message_received.text_data);
-        emit doUiData(history, users_list);
-        return;
-    }
-
-    QString buf;
-    users_list.clear();
-    for (int i = 0, ok = 0; i < message_received.text_data.size(); ++i) {
-        buf.append(message_received.text_data[i]);
-        if (message_received.text_data[i] == ' ') {
-            if (ok == 0 && !buf.contains("Users:")) {
-                break;
-            }
-            else {
-             ++ok;
-            }
-            users_list.append(buf + '\n');
-            buf.clear();
-        }
-    }
-
-    emit doUiData(history, users_list);
-}
-
 void BackEnd::disconnectFromSecureHost() {
     sslSocket.disconnectFromHost();
 }
 
 void BackEnd::onReadyRead() {
-        QDataStream stream(&sslSocket);
-        stream.startTransaction();
-        stream >> user_received >> message_received;
-
-        if (stream.commitTransaction()) {
-            outputToUi();
-        }
-        else {
-            // Add error handling here
-            qDebug() << "Error:" << stream.status();
-            return;
-        }
+    emit doUiData();
 }
+
+QString BackEnd::getAuthor() {
+    return SqlConversationModel::author;
+}
+
+void BackEnd::initFirstStage(QString hostname, quint16 port, const QString &username) {
+    SqlConversationModel::author = username;
+    this->hostname = hostname;
+    this->port = port;
+}
+
+void BackEnd::addNewUserToDB(const QString &username, const QString &password, const QString &fullname) {
+    const QString query_text = QString::fromLatin1("INSERT INTO users.user VALUES ('%1', '%2', '%3', '')").arg(username).arg(password).arg(fullname);
+    query.exec(query_text);
+}
+
+bool BackEnd::checkCredentialsWithDB(const QString &username, const QString &password) {
+    const QString query_text = QString::fromLatin1("SELECT * FROM  users.user WHERE username='%1';").arg(username);
+    query.exec(query_text);
+    query.first();
+
+    return query.value(1) == password;
+}
+
+void BackEnd::updateCurrentRoom(const QString &roomname) {
+    query.exec("SET SQL_SAFE_UPDATES=0;");
+    const QString query_text = QString::fromLatin1("UPDATE users.user SET current_room='%1' WHERE username='%2';").arg(roomname).arg(SqlConversationModel::author);
+    query.exec(query_text);
+}
+
+void BackEnd::notifyServerOfNewConnection(const QString &recipient) {
+    SqlConversationModel tmp;
+    tmp.sendMessage(recipient, SqlConversationModel::author + " has connected!");
+    this->notifyServerOfNewMessage();
+}
+
+void BackEnd::notifyServerOfDisconnect(const QString &recipient) {
+    SqlConversationModel tmp;
+    tmp.sendMessage(recipient, SqlConversationModel::author + " has left!");
+    this->notifyServerOfNewMessage();
+}
+

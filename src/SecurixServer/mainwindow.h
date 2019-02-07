@@ -14,7 +14,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 private:
-    BackEnd network_manager;
+    BackEnd &network_manager = BackEnd::instance();
     Ui::MainWindow *ui;
 };
 

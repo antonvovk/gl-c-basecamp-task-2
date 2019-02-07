@@ -2,7 +2,26 @@
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
 #include <QtQuick>
+#include <QStandardPaths>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QtQml>
+
 #include "backend.h"
+#include "sqlconversationmodel.h"
+#include "sqluserlistmodel.h"
+
+static void connectToDatabase() {
+    QSqlDatabase database = QSqlDatabase::addDatabase("QMYSQL");
+    database.setHostName("localhost");
+    database.setDatabaseName("users");
+    database.setUserName("securix");
+    database.setPassword("qw&UZ**485$xX9");
+
+    if (!database.open()) {
+        qFatal("Cannot open database: %s", qPrintable(database.lastError().text()));
+    }
+}
 
 int main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -10,7 +29,12 @@ int main(int argc, char *argv[]) {
 
     QGuiApplication app(argc, argv);
 
-    BackEnd back_end;
+    qmlRegisterType<SqlUserListModel>("io.qt.examples.chattutorial", 1, 0, "SqlUserListModel");
+    qmlRegisterType<SqlConversationModel>("io.qt.examples.chattutorial", 1, 0, "SqlConversationModel");
+
+    connectToDatabase();
+
+    BackEnd &back_end = BackEnd::instance();
     QQmlApplicationEngine engine;
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

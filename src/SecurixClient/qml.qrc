@@ -1,7 +1,11 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>FirstPage.qml</file>
-        <file>SecondPage.qml</file>
+        <file>ChatToolBar.qml</file>
+        <file>ConversationPage.qml</file>
+        <file>SignIn.qml</file>
+        <file>SignUp.qml</file>
+        <file>RoomSelect.qml</file>
+        <file>UserList.qml</file>
     </qresource>
 </RCC>

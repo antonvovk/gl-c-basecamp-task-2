@@ -2,33 +2,58 @@ import QtQuick 2.9
 import QtQuick.Controls 2.3
 import QtQuick.Controls.Material 2.3
 
+
 ApplicationWindow {
-    visible: true
-
     Material.theme: Material.White
-    Material.accent: Material.Orange
+    Material.accent: Material.Blue
 
-    width: 640
-    height: 480
+    id: window
+    width: 540
+    height: 960
+    visible: true
     title: qsTr("Securix")
 
     StackView {
-        id: stack
-        initialItem: first_page
+            id: stackView
+            anchors.fill: parent
+            initialItem: sign_in
     }
 
     Component {
-        id: first_page
-        FirstPage {
+        id: sign_in
+        SignIn {
 
         }
     }
 
     Component {
-        id: second_page
-        SecondPage {
+        id: sign_up
+        SignUp{
+
+        }
+    }
+
+    Component {
+        id: room_select
+        RoomSelect {
+
+        }
+    }
+
+    Component {
+        id: conversation_page
+        ConversationPage {
+
+        }
+    }
+
+    Component {
+        id: user_list
+        UserList {
 
         }
     }
 }
+
+
 

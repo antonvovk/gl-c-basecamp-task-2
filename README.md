@@ -1,4 +1,4 @@
-# GL C BaseCamp Task 2 (Secure Chat)
+﻿# GL C BaseCamp Task 2 (Secure Chat)
 
 Application will:
 - Consist of server and client parts.
@@ -16,6 +16,7 @@ Application will:
 ![ex1](ex1.png)
 ![ex2](ex2.png)
 ![ex3](ex3.png)
+![ex4](ex4.png)
 
 # Next things to do:
 - Make better ui

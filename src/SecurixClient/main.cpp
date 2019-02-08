@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<SqlUserListModel>("io.qt.examples.chattutorial", 1, 0, "SqlUserListModel");
-    qmlRegisterType<SqlConversationModel>("io.qt.examples.chattutorial", 1, 0, "SqlConversationModel");
+    qmlRegisterType<SqlUserListModel>("user.list.model", 1, 0, "SqlUserListModel");
+    qmlRegisterType<SqlConversationModel>("conversation.model", 1, 0, "SqlConversationModel");
 
     connectToDatabase();
 
